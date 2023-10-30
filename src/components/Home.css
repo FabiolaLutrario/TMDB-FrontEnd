@@ -1,0 +1,21 @@
+.background-image {
+  background-image: url("../assets/home.jpg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  height: 100vh;
+  opacity: 0.7;
+}
+
+.container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto; /* Centrar horizontalmente */
+  position: relative;
+  top: 50%; /* Centrar verticalmente */
+  transform: translateY(-50%);
+}

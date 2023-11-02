@@ -19,16 +19,16 @@ export default createReducer(initialState, {
     if (!state.id) {
       return state;
     }
-    //Flight already in favorites
+    //Film already in favorites
     if (state.favorites.find((favorite) => favorite.id === action.payload.id)) {
       return state;
     }
 
-    //Flight added to favorites
+    //Film added to favorites
     return { ...state, favorites: [...state.favorites, action.payload] };
   },
   [removeFromFavs]: (state, action) => {
-    //Flight removed from favorites
+    //Film removed from favorites
     return {
       ...state,
       favorites: state.favorites.filter(

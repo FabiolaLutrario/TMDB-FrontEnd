@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { BsSearch } from "react-icons/bs";
-import "./Navbar.scss";
+import { useDispatch } from "react-redux";
+import { setSearchResults } from "../state/search-results";
+import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
-import { Routes, Route, useNavigate } from "react-router";
 
 function Navbar() {
   const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log(searchResults);
-  }, [searchResults]);
+  const goToHome = (e) => {
+    e.preventDefault();
+    setSearch("");
+    navigate("/");
+  };
 
   const handleChangeSearch = (e) => {
     setSearch(e.target.value);
@@ -24,7 +27,7 @@ function Navbar() {
     axios
       .post(`/api/users/logout`)
       .then(() => {
-        window.location.reload();
+        window.location.href = "/";
       })
       .catch((error) => console.error(error));
   };
@@ -38,7 +41,10 @@ function Navbar() {
         `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${search}`
       )
       .then((response) => {
-        setSearchResults(response.data.results);
+        dispatch(setSearchResults(response.data.results));
+      })
+      .then(() => {
+        navigate("/search-results");
       })
       .catch((error) => {
         console.error("Error al buscar películas y series:", error);
@@ -49,15 +55,17 @@ function Navbar() {
     <div>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            Inicio
-          </a>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#">
+              <li class="nav-item">
+                <Link class="nav-link active" onClick={goToHome}>
+                  Inicio
+                </Link>
+              </li>
+              <li class="nav-item">
+                <Link class="nav-link active" onClick={goToHome}>
                   Mis Favoritos
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
                 <form className="d-flex" role="search">

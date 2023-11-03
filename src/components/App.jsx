@@ -23,8 +23,9 @@ const App = () => {
   useEffect(() => {
     axios
       .get(`/api/users/me`)
-      .then((res) => {
-        dispatch(setUser(res.data));
+      .then((res) => res.data)
+      .then((user) => {
+        dispatch(setUser(user));
       })
       .catch((error) => console.error(error));
   }, []);
@@ -74,12 +75,7 @@ const App = () => {
       {user.id ? (
         <>
           <Navbar />
-          <div>
-            {/*           <img
-              src="./assets/will-smith-presenta.png"
-              alt="Will Smith presentando"
-            /> */}
-          </div>
+          <div></div>
         </>
       ) : (
         <div className="container-parent">
@@ -240,6 +236,7 @@ const App = () => {
       <Routes>
         <Route path="/" />
         <Route path="/search-results" element={<Grid />} />
+        <Route path="/favorites" element={<Grid />} />
       </Routes>
     </>
   );

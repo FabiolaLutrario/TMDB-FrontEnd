@@ -1,15 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BsSearch } from "react-icons/bs";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSearchResults } from "../state/search-results";
+import { setFavoritesResults } from "../state/favorites-results";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
+import { setFavorites } from "../state/favorites";
 
 function Navbar() {
+  const apiKey = "eb7ac5fce53eae88ea5e99a0a131a414";
+  const user = useSelector((state) => state.user);
+  const favorites = useSelector((state) => state.favorites);
+  const favoritesResults = useSelector((state) => state.favoritesResults);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  function searchFavoritesByIds(favorites) {
+    const filmsPromises = favorites.map((favorite) => {
+      return axios
+        .get(
+          `https://api.themoviedb.org/3/${favorite.media_type}/${favorite.film_id}?api_key=${apiKey}`
+        )
+        .then((response) => response.data)
+        .catch((error) => {
+          console.error(
+            "Error al buscar película o serie por ID:",
+            error.message
+          );
+          return null;
+        });
+    });
+    return Promise.all(filmsPromises);
+  }
 
   const goToHome = (e) => {
     e.preventDefault();
@@ -17,24 +41,35 @@ function Navbar() {
     navigate("/");
   };
 
-  const handleChangeSearch = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const handleLogoutClick = (e) => {
+  const goToFavorites = (e) => {
     e.preventDefault();
+    setSearch("");
 
-    axios
-      .post(`/api/users/logout`)
-      .then(() => {
-        window.location.href = "/";
-      })
-      .catch((error) => console.error(error));
+    const localFavorites = localStorage.getItem("favorites");
+    if (localFavorites) {
+      const parsedFavorites = JSON.parse(localFavorites);
+      dispatch(setFavoritesResults(parsedFavorites));
+      navigate("/favorites");
+    } else {
+      axios
+        .get(`/api/favorites/user/${user.id}`)
+        .then((res) => {
+          dispatch(setFavorites(res.data));
+          return searchFavoritesByIds(res.data);
+        })
+        .then((favoritesResult) => {
+          dispatch(setFavoritesResults(favoritesResult));
+          localStorage.setItem("favorites", JSON.stringify(favoritesResult));
+          navigate("/favorites");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   };
 
   const handleSearchClick = (e) => {
     e.preventDefault();
-    const apiKey = "eb7ac5fce53eae88ea5e99a0a131a414";
 
     axios
       .get(
@@ -51,19 +86,35 @@ function Navbar() {
       });
   };
 
+  const handleChangeSearch = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+
+    axios
+      .post(`/api/users/logout`)
+      .then(() => {
+        localStorage.removeItem("favorites");
+        window.location.href = "/";
+      })
+      .catch((error) => console.error(error));
+  };
+
   return (
     <div>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <Link class="nav-link active" onClick={goToHome}>
+              <li className="nav-item">
+                <Link className="nav-link active" onClick={goToHome}>
                   Inicio
                 </Link>
               </li>
-              <li class="nav-item">
-                <Link class="nav-link active" onClick={goToHome}>
+              <li className="nav-item">
+                <Link className="nav-link active" onClick={goToFavorites}>
                   Mis Favoritos
                 </Link>
               </li>

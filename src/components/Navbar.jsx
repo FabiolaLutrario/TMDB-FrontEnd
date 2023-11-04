@@ -11,8 +11,6 @@ import { setFavorites } from "../state/favorites";
 function Navbar() {
   const apiKey = "eb7ac5fce53eae88ea5e99a0a131a414";
   const user = useSelector((state) => state.user);
-  const favorites = useSelector((state) => state.favorites);
-  const favoritesResults = useSelector((state) => state.favoritesResults);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,9 +18,7 @@ function Navbar() {
   function searchFavoritesByIds(favorites) {
     const filmsPromises = favorites.map((favorite) => {
       return axios
-        .get(
-          `https://api.themoviedb.org/3/${favorite.media_type}/${favorite.film_id}?api_key=${apiKey}`
-        )
+        .get(`/api/films/${favorite.media_type}/${favorite.film_id}`)
         .then((response) => response.data)
         .catch((error) => {
           console.error(
@@ -70,13 +66,35 @@ function Navbar() {
 
   const handleSearchClick = (e) => {
     e.preventDefault();
+    let results;
 
     axios
-      .get(
-        `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${search}`
-      )
+      .get(`/api/films/${search}`)
       .then((response) => {
-        dispatch(setSearchResults(response.data.results));
+        console.log(response.data.results);
+        results = response.data.results;
+
+        // Realiza una solicitud para cada elemento de película o serie para obtener información de video
+        const videoRequests = results.map((film) => {
+          if (film.media_type === "movie") {
+            return axios.get(`/api/films/movie/${film.id}`);
+          } else if (film.media_type === "tv") {
+            return axios.get(`/api/films/tv/${film.id}`);
+          } else {
+            // Si el elemento no es una película ni una serie, regresa una promesa resuelta con null
+            return Promise.resolve(null);
+          }
+        });
+        return Promise.all(videoRequests);
+      })
+      .then((videoResponses) => {
+        const combinedResults = results.map((result, index) => {
+          if (videoResponses[index]) {
+            result.videos = videoResponses[index].data.videos;
+          }
+          return result;
+        });
+        dispatch(setSearchResults(combinedResults));
       })
       .then(() => {
         navigate("/search-results");

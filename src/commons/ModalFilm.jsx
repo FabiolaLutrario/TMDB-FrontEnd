@@ -11,8 +11,9 @@ import {
   setFavoritesResults,
 } from "../state/favorites-results";
 import { useLocation } from "react-router";
+import YouTube from "react-youtube";
 
-function ModalFilm({ show, handleClose, film }) {
+function ModalFilm({ show, handleClose, film, trailer }) {
   const location = useLocation();
   const typeURL = location.pathname.slice(1);
   console.log(typeURL);
@@ -21,6 +22,7 @@ function ModalFilm({ show, handleClose, film }) {
   const user = useSelector((state) => state.user);
   const favoritesResults = useSelector((state) => state.favoritesResults);
   const [isChangeToFavorites, setIsChangeToFavorites] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
   function searchFavoritesByIds(favorites) {
     const filmsPromises = favorites.map((favorite) => {
@@ -118,6 +120,7 @@ function ModalFilm({ show, handleClose, film }) {
   return (
     <Modal
       size="lg"
+      className="another-styles-modal"
       show={show}
       onHide={handleClose}
       aria-labelledby="example-modal-sizes-title-lg"
@@ -128,15 +131,42 @@ function ModalFilm({ show, handleClose, film }) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <img
-          className="imgStyle"
-          src={
-            film.poster_path
-              ? "https://image.tmdb.org/t/p/w500" + film.poster_path
-              : "https://menteylente.files.wordpress.com/2016/04/film.jpg"
-          }
-          alt="Imagen del Film"
-        />
+        {trailer ? (
+          <div className="youtube-player-container">
+            <YouTube
+              videoId={trailer.key}
+              className="reproductor"
+              containerClassName={"youtube-container amru"}
+              opts={{
+                width: "100%",
+                playerVars: {
+                  autoplay: 1,
+                  controls: 0,
+                  cc_load_policy: 0,
+                  fs: 0,
+                  iv_load_policy: 0,
+                  modestbranding: 0,
+                  rel: 0,
+                  showinfo: 0,
+                },
+              }}
+            />
+          </div>
+        ) : (
+          <img
+            className="imgStyle"
+            src={
+              film.poster_path
+                ? "https://image.tmdb.org/t/p/w500" + film.poster_path
+                : "https://menteylente.files.wordpress.com/2016/04/film.jpg"
+            }
+            alt="Imagen del Film"
+          />
+        )}
+
+        <div className="filmOverview">
+          <p>{film.overview}</p>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button

@@ -13,43 +13,55 @@ const Grid = () => {
   const dispatch = useDispatch();
   const searchResults = useSelector((state) => state.searchResults);
   const favoritesResults = useSelector((state) => state.favoritesResults);
-  const [film, setFilm] = useState("");
+  const [film, setFilm] = useState({});
   const [show, setShow] = useState(false);
+  const [trailer, setTrailer] = useState(null);
 
   const handleClose = () => setShow(false);
+
   const handleShow = (film) => {
     setFilm(film);
+    console.log("Me volvewre locaa: ", film);
+
+    if (film.videos && film.videos.results) {
+      const trailerResult = film.videos.results.find((video) =>
+        video.name.includes("Official Trailer")
+      );
+      setTrailer(trailerResult ? trailerResult : film.videos.results[0]);
+    }
+
     setShow(true);
   };
 
   useEffect(() => {
+    // Restablece el estado de trailer al cerrar el modal
+    if (!show) {
+      setTrailer(null);
+      //setFilm({});
+    }
+
     const localFavorites = localStorage.getItem("favorites");
     if (localFavorites) {
       const parsedFavorites = JSON.parse(localFavorites);
       dispatch(setFavoritesResults(parsedFavorites));
     }
-  }, []);
+  }, [show]);
+
+  // Escucha cambios en la variable film y actualiza trailer
+  useEffect(() => {
+    if (film && film.videos && film.videos.results) {
+      const trailerResult = film.videos.results.find((video) =>
+        video.name.includes("Official Trailer")
+      );
+      setTrailer(trailerResult ? trailerResult : film.videos.results[0]);
+    }
+  }, [film]);
 
   if (typeURL === "search-results") {
     films = searchResults;
   } else if (typeURL === "favorites") {
     films = favoritesResults;
   }
-
-  /*   const updateFavorites = (newFavorites) => {
-    dispatch(setFavorites(newFavorites));
-    // Guardar en localStorage
-    localStorage.setItem("favorites", JSON.stringify(newFavorites));
-  };
-  
-  // Al cargar la página, verifica si hay favoritos en localStorage y configura el estado de Redux
-  useEffect(() => {
-    const localFavorites = localStorage.getItem("favorites");
-    if (localFavorites) {
-      const parsedFavorites = JSON.parse(localFavorites);
-      dispatch(setFavorites(parsedFavorites));
-    }
-  }, []); */
 
   return (
     <>
@@ -81,7 +93,12 @@ const Grid = () => {
           No se encontraron resultados.
         </div>
       )}
-      <ModalFilm show={show} handleClose={handleClose} film={film} />
+      <ModalFilm
+        show={show}
+        handleClose={handleClose}
+        film={film}
+        trailer={trailer}
+      />
     </>
   );
 };

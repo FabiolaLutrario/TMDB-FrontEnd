@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../state/user";
 import axios from "axios";
 import Navbar from "./Navbar";
 import "./App.scss";
 import Grid from "./Grid";
+import Home from "./Home";
 
 const App = () => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ const App = () => {
         dispatch(setUser(user));
       })
       .catch((error) => console.error(error));
-  }, []);
+  }, [dispatch]);
 
   const handleInputChange = (e) => {
     const { name } = e.target;
@@ -234,9 +235,17 @@ const App = () => {
       )}
 
       <Routes>
-        <Route path="/" />
-        <Route path="/search-results" element={<Grid />} />
-        <Route path="/favorites" element={<Grid />} />
+        <Route path="/" element={<Home />} />
+        <Route
+          path="favorites"
+          element={user.id ? <Grid type="favorites" /> : <Navigate to="/" />}
+        />
+        <Route
+          path="search-results"
+          element={
+            user.id ? <Grid type="search-results" /> : <Navigate to="/" />
+          }
+        />
       </Routes>
     </>
   );

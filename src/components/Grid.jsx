@@ -21,7 +21,6 @@ const Grid = () => {
 
   const handleShow = (film) => {
     setFilm(film);
-    console.log("Me volvewre locaa: ", film);
 
     if (film.videos && film.videos.results) {
       const trailerResult = film.videos.results.find((video) =>
@@ -40,6 +39,7 @@ const Grid = () => {
       //setFilm({});
     }
 
+    //Obtiene los favoritos del localStorage al actualizar el componente Grid.js
     const localFavorites = localStorage.getItem("favorites");
     if (localFavorites) {
       const parsedFavorites = JSON.parse(localFavorites);

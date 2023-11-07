@@ -71,7 +71,6 @@ function Navbar() {
     axios
       .get(`/api/films/${search}`)
       .then((response) => {
-        console.log(response.data.results);
         results = response.data.results;
 
         // Realiza una solicitud para cada elemento de película o serie para obtener información de video

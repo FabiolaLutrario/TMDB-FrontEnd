@@ -1,129 +1,89 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setTrendingTv } from "../state/trending-tv";
+import { setTrending } from "../state/trending";
+import { setUpcoming } from "../state/upcoming";
+import { setActorsTrending } from "../state/actors-trending";
 import axios from "axios";
 import "./Home.scss";
+import Carousel from "../commons/Carousel";
 
 function Home() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const trendingTv = useSelector((state) => state.trendingTv);
-  const carouselRef = useRef(null);
+  const trending = useSelector((state) => state.trending);
+  const upcoming = useSelector((state) => state.upcoming);
+  const actorsTrending = useSelector((state) => state.actorsTrending);
 
   useEffect(() => {
-    const localTrendingTv = localStorage.getItem("trendingTv");
-    if (localTrendingTv) {
-      const parsedTrendingTv = JSON.parse(localTrendingTv);
-      dispatch(setTrendingTv(parsedTrendingTv));
+    const sessionTrending = sessionStorage.getItem("trending");
+    if (sessionTrending) {
+      const parsedTrending = JSON.parse(sessionTrending);
+      dispatch(setTrending(parsedTrending));
     } else {
       axios
         .get(`/api/films/trending/all/day`)
         .then((res) => {
-          dispatch(setTrendingTv(res.data.results));
-          localStorage.setItem("trendingTv", JSON.stringify(res.data.results));
+          dispatch(setTrending(res.data.results));
+          sessionStorage.setItem("trending", JSON.stringify(res.data.results));
         })
         .catch((error) => {
           console.error(error);
         });
     }
 
-    // Programar el cambio automático de las diapositivas cada 3 segundos
-    const interval = setInterval(() => {
-      if (carouselRef.current) {
-        const nextButton = carouselRef.current.querySelector(
-          "[data-bs-slide='next']"
-        );
-        if (nextButton) {
-          nextButton.click();
-        }
-      }
-    }, 5000);
+    const sessionUpcoming = sessionStorage.getItem("upcoming");
+    if (sessionUpcoming) {
+      const parsedUpcoming = JSON.parse(sessionUpcoming);
+      dispatch(setUpcoming(parsedUpcoming));
+    } else {
+      axios
+        .get(`/api/films/movie/upcoming`)
+        .then((res) => {
+          dispatch(setUpcoming(res.data.results));
+          sessionStorage.setItem("upcoming", JSON.stringify(res.data.results));
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
 
-    // Limpiar el intervalo cuando el componente se desmonta
-    return () => clearInterval(interval);
+    const sessionActorsTrending = sessionStorage.getItem("actorsTrending");
+    if (sessionActorsTrending) {
+      const parsedActorsTrending = JSON.parse(sessionActorsTrending);
+      dispatch(setActorsTrending(parsedActorsTrending));
+    } else {
+      axios
+        .get(`/api/films/trending/person/day`)
+        .then((res) => {
+          dispatch(setActorsTrending(res.data.results));
+          sessionStorage.setItem(
+            "actorsTrending",
+            JSON.stringify(res.data.results)
+          );
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   }, [dispatch]);
 
   return user.id ? (
     <>
-      <div>
-        <h2
-          style={{
-            color: "#fff",
-            backgroundColor: "#000000",
-            marginTop: "10px",
-            marginBottom: "10px",
-            paddingTop: "10px",
-            paddingBottom: "10px",
-          }}
-        >
-          Series y Películas más Populares:
-        </h2>
-      </div>
-      <div className="container-sm">
-        <div
-          ref={carouselRef}
-          id="carouselExampleCaptions"
-          className="carousel slide another-styles"
-          data-bs-ride="carousel"
-        >
-          <div className="carousel-indicators">
-            {trendingTv.map((film, index) => (
-              <button
-                key={index}
-                type="button"
-                data-bs-target="#carouselExampleCaptions"
-                data-bs-slide-to={index}
-                className={index === 0 ? "active" : ""}
-                aria-label={`Slide ${index + 1}`}
-              ></button>
-            ))}
-          </div>
-          <div className="carousel-inner">
-            {trendingTv.map((film, index) => (
-              <div
-                key={index}
-                className={`carousel-item ${index === 0 ? "active" : ""}`}
-              >
-                <div className="container" style={{ marginTop: "10px" }}>
-                  <img
-                    className="img-styles container-sm"
-                    src={
-                      "https://image.tmdb.org/t/p/w500" + film.poster_path ||
-                      "https://igualati.org/wp-content/uploads/2023/03/pelicula-rodar-FB.jpg"
-                    }
-                    alt="Imagen del Film"
-                  />
-                </div>
-                <div className="carousel-caption d-none d-md-block"></div>
-              </div>
-            ))}
-          </div>
-          <button
-            className="carousel-control-prev"
-            type="button"
-            data-bs-target="#carouselExampleCaptions"
-            data-bs-slide="prev"
-          >
-            <span
-              className="carousel-control-prev-icon"
-              aria-hidden="true"
-            ></span>
-            <span className="visually-hidden">Previous</span>
-          </button>
-          <button
-            className="carousel-control-next"
-            type="button"
-            data-bs-target="#carouselExampleCaptions"
-            data-bs-slide="next"
-          >
-            <span
-              className="carousel-control-next-icon"
-              aria-hidden="true"
-            ></span>
-            <span className="visually-hidden">Next</span>
-          </button>
-        </div>
-      </div>
+      <Carousel
+        elements={trending}
+        title="Series y Películas Populares:"
+        id="trending-carousel"
+      />
+      <Carousel
+        elements={upcoming}
+        title="Próximos Estrenos:"
+        id="upcoming-carousel"
+      />
+      <Carousel
+        elements={actorsTrending}
+        title="Actores Populares:"
+        id="actorsTrending-carousel"
+      />
     </>
   ) : null;
 }

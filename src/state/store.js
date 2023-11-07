@@ -4,7 +4,9 @@ import userReducer from "./user";
 import searchResultsReducer from "./search-results";
 import favoritesResultsReducer from "./favorites-results";
 import favoritesReducer from "./favorites";
-import trendingTvReducer from "./trending-tv";
+import trendingReducer from "./trending";
+import upcomingReducer from "./upcoming";
+import actorsTrendingReducer from "./actors-trending";
 
 const store = configureStore({
   reducer: {
@@ -12,7 +14,9 @@ const store = configureStore({
     searchResults: searchResultsReducer,
     favoritesResults: favoritesResultsReducer,
     favorites: favoritesReducer,
-    trendingTv: trendingTvReducer,
+    trending: trendingReducer,
+    upcoming: upcomingReducer,
+    actorsTrending: actorsTrendingReducer,
   },
 });
 

@@ -22,10 +22,12 @@ function ModalFilm({ show, handleClose, film, trailer }) {
   const user = useSelector((state) => state.user);
   const favoritesResults = useSelector((state) => state.favoritesResults);
   const [isChangeToFavorites, setIsChangeToFavorites] = useState(false);
-  const [playing, setPlaying] = useState(false);
 
   function searchFavoritesByIds(favorites) {
     const filmsPromises = favorites.map((favorite) => {
+      /*       Cambiar este pedido axios y poner que si favorite.media_type==="tv" haga el pedido
+      al back en donde busca la serie por id; y si favorite.media_type ==="movie" haga el
+      pedido al back en donde busca la pelicula por id */
       return axios
         .get(
           `https://api.themoviedb.org/3/${favorite.media_type}/${favorite.film_id}?api_key=${apiKey}`
@@ -163,7 +165,6 @@ function ModalFilm({ show, handleClose, film, trailer }) {
             alt="Imagen del Film"
           />
         )}
-
         <div className="filmOverview">
           <p>{film.overview}</p>
         </div>

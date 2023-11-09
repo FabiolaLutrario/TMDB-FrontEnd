@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { BsSearch } from "react-icons/bs";
+import { BsReverseListColumnsReverse, BsSearch } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchResults } from "../state/search-results";
 import { setFavoritesResults } from "../state/favorites-results";
@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 import { setFavorites } from "../state/favorites";
 
 function Navbar() {
-  const apiKey = "eb7ac5fce53eae88ea5e99a0a131a414";
   const user = useSelector((state) => state.user);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
@@ -74,6 +73,10 @@ function Navbar() {
         results = response.data.results;
 
         // Realiza una solicitud para cada elemento de película o serie para obtener información de video
+
+        /* Acá podría poner un spinner que se despliegue mientras se terminan de 
+        resolver todas las promesas; cuando el resultado sea resolve o reject 
+        se deje de mostrar el spinner */
         const videoRequests = results.map((film) => {
           if (film.media_type === "movie") {
             return axios.get(`/api/films/movie/${film.id}`);
@@ -114,6 +117,12 @@ function Navbar() {
       .post(`/api/users/logout`)
       .then(() => {
         localStorage.removeItem("favorites");
+
+        //Solucionar este bug: Cuando cierro sesión o ventana
+        //del navegador no se eliminan los items de la sessionStorage:
+        sessionStorage.removeItem("trending");
+        sessionStorage.removeItem("upcominng");
+        sessionStorage.removeItem("actorsTrending");
         window.location.href = "/";
       })
       .catch((error) => console.error(error));

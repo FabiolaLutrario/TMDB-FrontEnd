@@ -4,7 +4,7 @@ function Carousel({ elements, title, id }) {
   const carouselRef = useRef(null);
 
   useEffect(() => {
-    // Programar el cambio automático de las diapositivas cada 3 segundos
+    // Programar el cambio automático de las diapositivas cada 5 segundos
     const interval = setInterval(() => {
       if (carouselRef.current) {
         const nextButton = carouselRef.current.querySelector(

@@ -77,6 +77,11 @@ function Navbar() {
         /* Acá podría poner un spinner que se despliegue mientras se terminan de 
         resolver todas las promesas; cuando el resultado sea resolve o reject 
         se deje de mostrar el spinner */
+
+        /* Acá en vez de buscar todos los tarilers de los resultados con Promise.all,
+        ir al componente Grid y buscar el trailer de esa serie o película por Id según 
+        sea el caso y mostrarlo. No hay necesidad de buscar todos los trailer de los results.
+         */
         const videoRequests = results.map((film) => {
           if (film.media_type === "movie") {
             return axios.get(`/api/films/movie/${film.id}`);
